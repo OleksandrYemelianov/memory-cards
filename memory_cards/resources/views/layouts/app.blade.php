@@ -11,9 +11,10 @@
 
     <title>{{ config('app.name', 'Laravel') }}</title>
     <!-- Fonts -->
+    <style>h4 { color: #212529; }</style>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet"/>
-
+    <link rel="manifest" href="/manifest.json">
     @vite('resources/css/app.css')
 </head>
 <body style="background-color: rgb(33, 37, 41)" class="bg-dark">

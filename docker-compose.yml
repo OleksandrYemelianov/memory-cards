@@ -2,28 +2,34 @@ services:
   app:
     build:
       context: .
-      dockerfile: ./docker/Dockerfile
+      dockerfile: docker/Dockerfile
     image: php:8.3.12-fpm
     container_name: php_app
     working_dir: /var/www
     volumes:
-      - ./memory_cards:/var/www
-    ports:
-      - "5173:5173"
+      - app_data:/var/www
+      - letsencrypt:/etc/letsencrypt
     networks:
       - laravel
+    depends_on:
+      mysql:
+        condition: service_healthy
 
   web:
     image: nginx:alpine
     container_name: nginx_web
     working_dir: /var/www
     volumes:
-      - ./memory_cards:/var/www
+      - app_data:/var/www
+      - letsencrypt:/etc/letsencrypt
       - ./docker/nginx:/etc/nginx/conf.d
     ports:
       - "80:80"
+      - "443:443"
     networks:
       - laravel
+    depends_on:
+      - app
 
   mysql:
     image: mysql:8.0
@@ -34,11 +40,28 @@ services:
       MYSQL_USER: memcards_user
       MYSQL_PASSWORD: 3333
     volumes:
-      - ./mysql:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
     ports:
       - "3307:3306"
     networks:
       - laravel
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+      - ./memory_cards/public:/var/www/public
+    networks:
+     - laravel
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/public && docker exec nginx_web nginx -s reload; sleep 12h & wait $${!}; done;'"
+    depends_on:
+      - web
 
 networks:
   laravel:
@@ -46,3 +69,5 @@ networks:
 
 volumes:
   mysql_data:
+  app_data:
+  letsencrypt:

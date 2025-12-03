@@ -187,13 +187,11 @@ export default {
                 if (group.id == from) {
                     fromQty = group.qty;
                     this.reactiveGroups[index].qty = 0;
-                    console.log('from = ', this.reactiveGroups);
                 }
             });
             this.reactiveGroups.forEach((group, index) => {
                 if (group.id == to) {
                     this.reactiveGroups[index].qty += fromQty;
-                    console.log('to = ', this.reactiveGroups);
                 }
             });
         },
