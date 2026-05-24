@@ -11,7 +11,7 @@ class DeeplTranslateService implements TranslatorInterface
 
     public function __construct(private string $apiKey)
     {
-        if (empty($this->auth_key)) {
+        if (empty($this->apiKey)) {
             throw new \InvalidArgumentException("The API key is not set.");
         }
         $this->translator = new Translator($this->apiKey);
