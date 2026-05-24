@@ -9,14 +9,12 @@ class DeeplTranslateService implements TranslatorInterface
 {
     private Translator $translator;
 
-    public function __construct()
+    public function __construct(private string $apiKey)
     {
-        $auth_key = config('translate.api_key');
         if (empty($auth_key)) {
             throw new \InvalidArgumentException("The API key is not set.");
         }
-        $this->translator = new Translator($auth_key);
-
+        $this->translator = new Translator($this->apiKey);
     }
 
     public function translate(string $text, string $from, string $to): string

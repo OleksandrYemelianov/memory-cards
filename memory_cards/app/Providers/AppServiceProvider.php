@@ -12,9 +12,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(DeeplTranslateService::class, function () {
-            return new DeeplTranslateService();
-        });
+        $this->app
+        ->when(DeeplTranslateService::class)
+        ->needs('$apiKey')
+        ->give(fn() => config('translate.api_key'));
     }
 
     /**
