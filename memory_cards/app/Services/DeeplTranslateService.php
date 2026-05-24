@@ -5,14 +5,16 @@ namespace App\Services;
 use App\Services\Contracts\TranslatorInterface;
 use DeepL\Translator;
 
-
 class DeeplTranslateService implements TranslatorInterface
 {
     private Translator $translator;
 
     public function __construct()
     {
-        $auth_key = env('TRANSLATE_API_KEY');
+        $auth_key = config('translate.api_key');
+        if (empty($auth_key)) {
+            throw new \InvalidArgumentException("The API key is not set.");
+        }
         $this->translator = new Translator($auth_key);
 
     }

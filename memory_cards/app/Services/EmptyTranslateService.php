@@ -3,8 +3,6 @@
 namespace app\Services;
 
 use App\Services\Contracts\TranslatorInterface;
-use DeepL\Translator;
-
 
 class EmptyTranslateService implements TranslatorInterface
 {

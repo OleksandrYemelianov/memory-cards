@@ -19,7 +19,7 @@ class TranslatorFactory
     public function make(string $service = ''): TranslatorInterface
     {
         if (empty($service)) {
-            $service = env('TRANSLATE_SERVICE', '');
+            $service = config('translate.service');
         }
 
         if (!isset($this->translators[$service])) {

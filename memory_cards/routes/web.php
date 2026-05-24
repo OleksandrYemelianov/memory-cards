@@ -50,7 +50,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/add', [CardController::class, 'create']);
 
         Route::get('/import', function () {
-            return view('cards.import',  GroupsHelper::getGroups());
+            return view('cards.import', GroupsHelper::getGroups());
         });
         Route::post('/import/csv', [CardController::class, 'importCsv']);
         Route::post('/translate', [CardController::class, 'translate']);
@@ -63,4 +63,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
