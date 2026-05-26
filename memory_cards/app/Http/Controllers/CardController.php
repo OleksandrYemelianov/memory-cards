@@ -8,19 +8,23 @@ use App\Helpers\UiLangHelper as Lang;
 use App\Helpers\UserDataHelper;
 use App\Http\Requests\CardRequest;
 use App\Models\MemoryCard;
+use App\Repositories\Contracts\MemoryCardRepositoryInterface;
 use App\Services\Contracts\TranslatorInterface;
 use App\Services\TranslatorFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-
 class CardController extends AppController
 {
     protected TranslatorInterface $translator;
 
-    public function __construct(MemoryCard $model, CardRequest $request, TranslatorFactory $translatorFactory)
-    {
+    public function __construct(
+        MemoryCard $model,
+        CardRequest $request,
+        TranslatorFactory $translatorFactory,
+        private MemoryCardRepositoryInterface $cards
+    ) {
         parent::__construct();
         $this->translator = $translatorFactory->make();
         $this->model = $model;
@@ -33,7 +37,8 @@ class CardController extends AppController
         if (empty($groups_info['groups'])) {
             return redirect()->route('group.index');
         }
-        $cards = $this->model->getCardsByGroup($groups_info['curr_group_id']);
+
+        $cards = $this->cards->findRandomizedByGroup($groups_info['curr_group_id']);
 
         $data = [
             'cards' => $cards,
@@ -41,6 +46,7 @@ class CardController extends AppController
             'current_lang' => AppLangHelper::getLang(),
             'current_group' => $groups_info['curr_group_id'],
         ];
+
         return view('cards.show', $data);
     }
 
@@ -49,16 +55,17 @@ class CardController extends AppController
         $file = $request->file('csv_file');
         $fileHandle = fopen($file->getPathname(), 'r');
         $cnt = 0;
-        $group_id = $request->get('group_app', 0);
+        $group_id = (int) $request->get('group_app', 0);
         while (($row = fgetcsv($fileHandle, 1000, ',')) !== false) {
-            $this->model->create([
+            $this->cards->create([
                 'foreign_word' => $row[0],
                 'translation' => $row[1],
-                'group_id' => $group_id
+                'group_id' => $group_id,
             ]);
             $cnt++;
         }
         fclose($fileHandle);
+
         return $this->responseJson(sprintf(Lang::get('imported_qty_cards'), $cnt));
     }
 
@@ -69,7 +76,8 @@ class CardController extends AppController
         if (empty($group_from) || empty($group_to)) {
             return $this->responseJson(Lang::get('select_group'), 500);
         }
-        $this->model->where('group_id', $group_from)->update(['group_id' => $group_to]);
+
+        $this->cards->moveAllBetweenGroups($group_from, $group_to);
 
         return $this->responseJson(Lang::get('saved'));
     }

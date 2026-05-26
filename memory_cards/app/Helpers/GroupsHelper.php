@@ -3,17 +3,13 @@
 namespace App\Helpers;
 
 use App\Models\Groups;
-use App\Models\MemoryCard;
 use App\Models\User;
+use App\Repositories\Contracts\MemoryCardRepositoryInterface;
 
 class GroupsHelper
 {
-
     /**
      * Set the current group for the authenticated user.
-     *
-     * @param int $group_id
-     * @return void
      */
     public static function setCurrentGroup(int $group_id): void
     {
@@ -24,8 +20,6 @@ class GroupsHelper
 
     /**
      * Get the current group of the authenticated user.
-     *
-     * @return int
      */
     public static function getCurrentGroup(): int
     {
@@ -34,8 +28,6 @@ class GroupsHelper
 
     /**
      * Remove the current group for the authenticated user.
-     *
-     * @return void
      */
     public static function removeCurrentGroup(): void
     {
@@ -46,9 +38,6 @@ class GroupsHelper
 
     /**
      * Retrieve all groups for a specific language.
-     *
-     * @param int $lang_id
-     * @return array
      */
     public static function getGroups(int $lang_id = 0): array
     {
@@ -71,19 +60,18 @@ class GroupsHelper
 
         return [
             'curr_group_id' => $curr_group_id,
-            'groups' => $groups
+            'groups' => $groups,
         ];
     }
 
     /**
      * Update the quantity for a specific group.
-     *
-     * @param int $group_id
-     * @return void
      */
     public static function updateQty(int $group_id): void
     {
-        $qty = (int)MemoryCard::where('group_id', $group_id)->count();
+        $cards = app(MemoryCardRepositoryInterface::class);
+        $qty = $cards->countByGroup($group_id);
+
         Groups::where('id', $group_id)->update(['qty' => $qty]);
     }
 }

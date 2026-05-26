@@ -23,20 +23,6 @@ class EloquentMemoryCardRepository implements MemoryCardRepositoryInterface
     /**
      * Fetch all cards in a group in randomized order.
      *
-     * Why not "ORDER BY RAND()":
-     *   ORDER BY RAND() executes RAND() for every row in the result set, then
-     *   sorts the entire set by that random value. This forces a full scan plus
-     *   an O(n log n) filesort and prevents the optimizer from using an index
-     *   for ordering. On large tables this becomes a serious latency problem.
-     *
-     * Strategy used here:
-     *   1) Fetch only IDs of the group's cards (indexed lookup, very fast).
-     *   2) Shuffle the ID array in PHP (Fisher-Yates, O(n)).
-     *   3) Fetch full rows by primary key with WHERE IN (...) — indexed lookup.
-     *   4) Reorder the fetched rows to match the shuffled ID order.
-     *
-     * The UserScope global scope is still applied on every query, so
-     * multi-tenant isolation is preserved.
      *
      * @return Collection<int, MemoryCard>
      */

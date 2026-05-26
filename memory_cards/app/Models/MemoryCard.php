@@ -16,15 +16,13 @@ class MemoryCard extends Model
     protected $fillable = [
         'foreign_word',
         'translation',
-        'group_id'
+        'group_id',
     ];
 
     /**
      * Boot the model and apply global scope.
-     *
-     * @return void
      */
-    public static function boot()
+    public static function boot(): void
     {
         parent::boot();
 
@@ -38,10 +36,8 @@ class MemoryCard extends Model
 
     /**
      * Generate a random color in HEX format.
-     *
-     * @return string
      */
-    public static function generateRandomColor()
+    public static function generateRandomColor(): string
     {
         $minBrightness = 0x33;
         $maxBrightness = 0xCC;
@@ -51,16 +47,5 @@ class MemoryCard extends Model
         $blue = mt_rand($minBrightness, $maxBrightness);
 
         return sprintf('#%02X%02X%02X', $red, $green, $blue);
-    }
-
-    /**
-     * Retrieve memory cards by their group.
-     *
-     * @param int $group_id
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public function getCardsByGroup(int $group_id)
-    {
-        return self::where('group_id', $group_id)->orderByRaw('RAND()')->get();
     }
 }
