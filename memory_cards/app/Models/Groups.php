@@ -18,10 +18,8 @@ class Groups extends Model
 
     /**
      * Boot the model and add global scopes and event listeners.
-     *
-     * @return void
      */
-    public static function boot()
+    public static function boot(): void
     {
         parent::boot();
 
@@ -35,16 +33,5 @@ class Groups extends Model
                 $group->lang_id = AppLangHelper::getId();
             }
         });
-    }
-
-    /**
-     * Get all groups by language ID.
-     *
-     * @param int $lang_id
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public static function getAll($lang_id)
-    {
-        return self::where('lang_id', $lang_id)->orderBy('name', 'asc')->get();
     }
 }

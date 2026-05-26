@@ -2,8 +2,8 @@
 
 namespace App\Helpers;
 
-use App\Models\Groups;
 use App\Models\User;
+use App\Repositories\Contracts\GroupRepositoryInterface;
 use App\Repositories\Contracts\MemoryCardRepositoryInterface;
 
 class GroupsHelper
@@ -47,7 +47,10 @@ class GroupsHelper
         if (empty($lang_id)) {
             return [];
         }
-        $groups = Groups::getAll($lang_id)->toArray();
+
+        $groupRepo = app(GroupRepositoryInterface::class);
+        $groups = $groupRepo->findAllByLanguage($lang_id)->toArray();
+
         $curr_group_id = self::getCurrentGroup();
         if (!empty($groups)) {
             $group_keys = array_column($groups, 'id');
@@ -65,13 +68,17 @@ class GroupsHelper
     }
 
     /**
-     * Update the quantity for a specific group.
+     * Update the cached card quantity for a specific group.
+     *
+     * Both the card count and the group update go through repositories now —
+     * no direct Eloquent model calls in this helper.
      */
     public static function updateQty(int $group_id): void
     {
         $cards = app(MemoryCardRepositoryInterface::class);
-        $qty = $cards->countByGroup($group_id);
+        $groups = app(GroupRepositoryInterface::class);
 
-        Groups::where('id', $group_id)->update(['qty' => $qty]);
+        $qty = $cards->countByGroup($group_id);
+        $groups->updateQuantity($group_id, $qty);
     }
 }
