@@ -7,7 +7,6 @@ use App\Helpers\GroupsHelper;
 use App\Helpers\UiLangHelper as Lang;
 use App\Helpers\UserDataHelper;
 use App\Http\Requests\CardRequest;
-use App\Models\MemoryCard;
 use App\Repositories\Contracts\MemoryCardRepositoryInterface;
 use App\Services\Contracts\TranslatorInterface;
 use App\Services\TranslatorFactory;
@@ -15,20 +14,23 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class CardController extends AppController
+class CardController extends ResourceController
 {
     protected TranslatorInterface $translator;
 
     public function __construct(
-        MemoryCard $model,
         CardRequest $request,
         TranslatorFactory $translatorFactory,
-        private MemoryCardRepositoryInterface $cards
+        private MemoryCardRepositoryInterface $cards,
     ) {
         parent::__construct();
         $this->translator = $translatorFactory->make();
-        $this->model = $model;
         $this->request = $request;
+    }
+
+    protected function getRepository(): MemoryCardRepositoryInterface
+    {
+        return $this->cards;
     }
 
     public function index(): mixed

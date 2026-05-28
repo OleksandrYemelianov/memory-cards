@@ -4,22 +4,29 @@ namespace App\Http\Controllers;
 
 use App\Helpers\GroupsHelper;
 use App\Http\Requests\GroupRequest;
-use App\Models\Groups;
-use App\Models\Langs;
+use App\Repositories\Contracts\GroupRepositoryInterface;
+use App\Repositories\Contracts\LangRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 
-class GroupsController extends AppController
+class GroupsController extends ResourceController
 {
-    public function __construct(Groups $model, GroupRequest $request)
-    {
+    public function __construct(
+        GroupRequest $request,
+        private GroupRepositoryInterface $groups,
+        private LangRepositoryInterface $langs,
+    ) {
         parent::__construct();
-        $this->model = $model;
         $this->request = $request;
+    }
+
+    protected function getRepository(): GroupRepositoryInterface
+    {
+        return $this->groups;
     }
 
     public function index(): mixed
     {
-        $langs = Langs::getAll();
+        $langs = $this->langs->findAll();
         $groups_info = GroupsHelper::getGroups();
         if (!$langs->count() || empty($groups_info)) {
             return redirect()->route('langs.index');

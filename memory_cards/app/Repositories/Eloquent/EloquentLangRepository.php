@@ -5,11 +5,37 @@ namespace App\Repositories\Eloquent;
 use App\Models\Langs;
 use App\Repositories\Contracts\LangRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 class EloquentLangRepository implements LangRepositoryInterface
 {
     public function __construct(private Langs $model)
     {
+    }
+
+    public function findByIdForUser(int $id, int $userId): ?Langs
+    {
+        return $this->model
+            ->where('id', $id)
+            ->where('user_id', $userId)
+            ->first();
+    }
+
+    public function create(array $attributes): Langs
+    {
+        return $this->model->create($attributes);
+    }
+
+    public function save(Model $entity, array $attributes): Langs
+    {
+        /** @var Langs $entity */
+        $entity->fill($attributes)->push();
+        return $entity;
+    }
+
+    public function delete(Model $entity): bool
+    {
+        return (bool) $entity->delete();
     }
 
     /**
@@ -25,24 +51,5 @@ class EloquentLangRepository implements LangRepositoryInterface
         return (int) $this->model
             ->where('loc', $locale)
             ->value('id') ?? 0;
-    }
-
-    public function findByIdForUser(int $id, int $userId): ?Langs
-    {
-        return $this->model
-            ->where('id', $id)
-            ->where('user_id', $userId)
-            ->first();
-    }
-
-    public function save(Langs $lang, array $attributes): Langs
-    {
-        $lang->fill($attributes)->push();
-        return $lang;
-    }
-
-    public function delete(Langs $lang): bool
-    {
-        return (bool) $lang->delete();
     }
 }

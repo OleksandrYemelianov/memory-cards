@@ -5,6 +5,7 @@ namespace App\Repositories\Eloquent;
 use App\Models\Groups;
 use App\Repositories\Contracts\GroupRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 class EloquentGroupRepository implements GroupRepositoryInterface
 {
@@ -18,6 +19,23 @@ class EloquentGroupRepository implements GroupRepositoryInterface
             ->where('id', $id)
             ->where('user_id', $userId)
             ->first();
+    }
+
+    public function create(array $attributes): Groups
+    {
+        return $this->model->create($attributes);
+    }
+
+    public function save(Model $entity, array $attributes): Groups
+    {
+        /** @var Groups $entity */
+        $entity->fill($attributes)->push();
+        return $entity;
+    }
+
+    public function delete(Model $entity): bool
+    {
+        return (bool) $entity->delete();
     }
 
     /**
@@ -36,21 +54,5 @@ class EloquentGroupRepository implements GroupRepositoryInterface
         return (bool) $this->model
             ->where('id', $id)
             ->update(['qty' => $quantity]);
-    }
-
-    public function create(array $attributes): Groups
-    {
-        return $this->model->create($attributes);
-    }
-
-    public function save(Groups $group, array $attributes): Groups
-    {
-        $group->fill($attributes)->push();
-        return $group;
-    }
-
-    public function delete(Groups $group): bool
-    {
-        return (bool) $group->delete();
     }
 }

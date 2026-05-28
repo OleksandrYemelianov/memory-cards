@@ -4,15 +4,16 @@ namespace App\Helpers;
 
 use App\Models\Langs;
 use App\Models\User;
+use App\Repositories\Contracts\LangRepositoryInterface;
 use Illuminate\Http\Request;
+use Illuminate\Suppoes\Auth;
+
+rt\Facad
 
 class AppLangHelper
 {
     /**
      * Set the application locale based on the request.
-     *
-     * @param Request $request HTTP request instance
-     * @return void
      */
     public static function setLocale(Request $request): void
     {
@@ -25,8 +26,6 @@ class AppLangHelper
 
     /**
      * Get the current user's locale.
-     *
-     * @return string The locale of the current user
      */
     public static function getLocale(): string
     {
@@ -35,9 +34,6 @@ class AppLangHelper
 
     /**
      * Set the current user's locale.
-     *
-     * @param string $locale The locale to be set
-     * @return void
      */
     public static function set(string $locale): void
     {
@@ -48,19 +44,24 @@ class AppLangHelper
 
     /**
      * Get the ID of the current locale.
-     *
-     * @return int The ID corresponding to the current locale
      */
     public static function getId(): int
     {
         $loc = self::getLocale();
-        return (int) Langs::getIdByLang($loc);
+        if (empty($loc)) {
+            return 0;
+        }
+
+        return app(LangRepositoryInterface::class)->findIdByLocale($loc);
     }
 
     /**
      * Retrieve the Langs model for the current locale.
      *
-     * @return Langs The Langs model instance for the current locale
+     * Note: Langs::find() is Laravel's built-in Eloquent finder, not a custom
+     * static query method. The refactor only removed our own ad-hoc statics
+     * (Langs::getAll(), Langs::getIdByLang()); wrapping every built-in finder
+     * would add boilerplate without architectural benefit.
      */
     public static function getLang(): Langs
     {
