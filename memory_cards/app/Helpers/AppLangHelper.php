@@ -6,9 +6,6 @@ use App\Models\Langs;
 use App\Models\User;
 use App\Repositories\Contracts\LangRepositoryInterface;
 use Illuminate\Http\Request;
-use Illuminate\Suppoes\Auth;
-
-rt\Facad
 
 class AppLangHelper
 {
