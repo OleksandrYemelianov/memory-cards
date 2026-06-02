@@ -2,13 +2,17 @@
 
 namespace App\Middleware;
 
-use App\Helpers\AppLangHelper;
+use App\Services\AppLangService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class AppLocaleMiddleware
+class AppLangMiddleware
 {
+    public function __construct(private AppLangService $lang)
+    {
+    }
+
     /**
      * Handle an incoming request.
      *
@@ -16,7 +20,7 @@ class AppLocaleMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        AppLangHelper::setLocale($request);
+        $this->lang->setFromRequest($request);
 
         return $next($request);
     }

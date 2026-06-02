@@ -2,20 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\GroupsHelper;
 use App\Http\Requests\GroupRequest;
 use App\Repositories\Contracts\GroupRepositoryInterface;
 use App\Repositories\Contracts\LangRepositoryInterface;
+use App\Services\AppLangService;
+use App\Services\GroupsService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 
 class GroupsController extends ResourceController
 {
     public function __construct(
         GroupRequest $request,
+        AppLangService $appLang,
         private GroupRepositoryInterface $groups,
         private LangRepositoryInterface $langs,
+        private GroupsService $groupsService,
     ) {
-        parent::__construct();
+        parent::__construct($appLang);
         $this->request = $request;
     }
 
@@ -24,26 +29,24 @@ class GroupsController extends ResourceController
         return $this->groups;
     }
 
-    public function index(): mixed
+    public function index(): View|RedirectResponse
     {
-        $langs = $this->langs->findAll();
-        $groups_info = GroupsHelper::getGroups();
-        if (!$langs->count() || empty($groups_info)) {
+        $langs      = $this->langs->findAll();
+        $groupsInfo = $this->groupsService->getGroups();
+        if (!$langs->count() || empty($groupsInfo)) {
             return redirect()->route('langs.index');
         }
 
-        $data = [
-            'langs' => $langs,
-            'groups' => $groups_info['groups'],
-            'app_lang_loc' => $this->app_lang_loc,
-            'current_group' => $groups_info['curr_group_id'],
-        ];
-
-        return view('cards.groups', $data);
+        return view('cards.groups', [
+            'langs'         => $langs,
+            'groups'        => $groupsInfo['groups'],
+            'app_lang_loc'  => $this->app_lang_loc,
+            'current_group' => $groupsInfo['curr_group_id'],
+        ]);
     }
 
     public function getAll(): JsonResponse
     {
-        return $this->responseJson('', 200, GroupsHelper::getGroups());
+        return $this->responseJson('', 200, $this->groupsService->getGroups());
     }
 }

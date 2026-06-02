@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LangsRequest;
 use App\Repositories\Contracts\LangRepositoryInterface;
+use App\Services\AppLangService;
 use App\Services\Contracts\TranslatorInterface;
 use App\Services\TranslatorFactory;
 use Illuminate\Support\Facades\Auth;
@@ -16,11 +17,12 @@ class LangsController extends ResourceController
     public function __construct(
         LangsRequest $request,
         TranslatorFactory $translatorFactory,
+        AppLangService $appLang,
         private LangRepositoryInterface $langs,
     ) {
-        parent::__construct();
+        parent::__construct($appLang);
         $this->translator = $translatorFactory->make();
-        $this->request = $request;
+        $this->request    = $request;
     }
 
     protected function getRepository(): LangRepositoryInterface
@@ -30,13 +32,11 @@ class LangsController extends ResourceController
 
     public function index(): View
     {
-        $data = [
-            'langs' => $this->langs->findAll()->toArray(),
-            'user_lang' => Auth::user()->loc,
-            'access_langs' => $this->translator->getAccessLangs(),
-            'app_lang_loc' => $this->app_lang_loc,
-        ];
-
-        return view('cards.langs', $data);
+        return view('cards.langs', [
+            'langs'         => $this->langs->findAll()->toArray(),
+            'user_lang'     => Auth::user()->loc,
+            'access_langs'  => $this->translator->getAccessLangs(),
+            'app_lang_loc'  => $this->app_lang_loc,
+        ]);
     }
 }

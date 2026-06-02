@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\AppLangHelper;
+use App\Services\AppLangService;
 use App\Traits\AppResponse;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
@@ -15,10 +15,10 @@ abstract class AppController
     protected int $app_lang_id;
     protected FormRequest $request;
 
-    public function __construct()
+    public function __construct(protected AppLangService $appLang)
     {
-        $this->app_lang_loc = AppLangHelper::getLocale();
-        $this->app_lang_id  = AppLangHelper::getId();
+        $this->app_lang_loc = $appLang->getLocale();
+        $this->app_lang_id  = $appLang->getId();
     }
 
     /**

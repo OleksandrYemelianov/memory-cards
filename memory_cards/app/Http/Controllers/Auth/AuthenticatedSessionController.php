@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Helpers\AppLangHelper;
-use App\Helpers\GroupsHelper;
-use App\Helpers\UiLangHelper;
-use App\Helpers\UserDataHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Services\UserDataService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
+    public function __construct(private UserDataService $userData)
+    {
+    }
+
     /**
      * Display the login view.
      */
@@ -52,32 +52,30 @@ class AuthenticatedSessionController extends Controller
 
     public function demo(Request $request): RedirectResponse
     {
-        $data = [
+        return $this->authUser([
             'credentials' => [
-                'email' => 'demo@demo.com',
+                'email'    => 'demo@demo.com',
                 'password' => 'demodemo',
             ],
             'id' => 1,
-        ];
-        return $this->authUser($data, $request);
+        ], $request);
     }
 
     public function demoUa(Request $request): RedirectResponse
     {
-        $data = [
+        return $this->authUser([
             'credentials' => [
-                'email' => 'demoua@demoua.com',
+                'email'    => 'demoua@demoua.com',
                 'password' => 'demouademoua',
             ],
             'id' => 2,
-        ];
-        return $this->authUser($data, $request);
+        ], $request);
     }
 
     private function authUser(array $data, Request $request): RedirectResponse
     {
         if (Auth::attempt($data['credentials'])) {
-            UserDataHelper::import($data['id']);
+            $this->userData->import($data['id']);
             $request->session()->regenerate();
         }
 

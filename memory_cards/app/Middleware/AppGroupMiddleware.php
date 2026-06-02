@@ -2,13 +2,20 @@
 
 namespace App\Middleware;
 
-use App\Helpers\GroupsHelper;
+use App\Services\CurrentGroupService;
+use App\Services\GroupsService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class AppGroupMiddleware
 {
+    public function __construct(
+        private CurrentGroupService $currentGroup,
+        private GroupsService $groups,
+    ) {
+    }
+
     /**
      * Handle an incoming request.
      *
@@ -18,12 +25,10 @@ class AppGroupMiddleware
     {
         if ($request->isMethod('post')) {
             if ($request->has('group_app')) {
-                $group_id = (int) $request->post('group_app');
-                GroupsHelper::setCurrentGroup($group_id);
+                $this->currentGroup->set((int) $request->post('group_app'));
             }
             if ($request->has('group_qty')) {
-                $group_id = (int) $request->post('group_qty');
-                GroupsHelper::updateQty($group_id);
+                $this->groups->updateQty((int) $request->post('group_qty'));
             }
         }
 

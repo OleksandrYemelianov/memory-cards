@@ -1,6 +1,5 @@
 <?php
 
-use App\Helpers\GroupsHelper;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\LangsController;
@@ -40,18 +39,10 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::prefix('/cards')->group(function () {
-        Route::get('/add', function () {
-            $groups = GroupsHelper::getGroups();
-            if (!count($groups['groups'])) {
-                return redirect()->route('group.index');
-            }
-            return view('cards.create', $groups);
-        })->name('card.add');
+        Route::get('/add', [CardController::class, 'addView'])->name('card.add');
         Route::post('/add', [CardController::class, 'create']);
 
-        Route::get('/import', function () {
-            return view('cards.import', GroupsHelper::getGroups());
-        });
+        Route::get('/import', [CardController::class, 'importView']);
         Route::post('/import/csv', [CardController::class, 'importCsv']);
         Route::post('/translate', [CardController::class, 'translate']);
         Route::post('/update/{card_id}', [CardController::class, 'update'])->where(['card_id' => '[0-9]+']);
