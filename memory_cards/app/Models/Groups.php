@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Helpers\AppLangHelper;
 use App\Scopes\UserScope;
+use App\Services\AppLangService;
 use App\Traits\SerializeData;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -30,7 +30,7 @@ class Groups extends Model
                 $group->user_id = Auth::id();
             }
             if (empty($group->lang_id)) {
-                $group->lang_id = AppLangHelper::getId();
+                $group->lang_id = app(AppLangService::class)->getId();
             }
         });
     }
