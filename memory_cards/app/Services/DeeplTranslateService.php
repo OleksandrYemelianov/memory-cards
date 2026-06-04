@@ -46,7 +46,7 @@ class DeeplTranslateService implements TranslatorInterface
         return !$this->translator->getUsage()->anyLimitReached();
     }
 
-    private function getTargetLanguage(string $code)
+    private function getTargetLanguage(string $code): string
     {
         return match ($code) {
             'EN' => 'EN-GB',

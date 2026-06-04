@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class UserScope implements Scope
 {
-    public function apply(Builder $builder, Model $model)
+    public function apply(Builder $builder, Model $model): void
     {
         $builder->where('user_id', Auth::id());
     }
