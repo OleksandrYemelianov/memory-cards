@@ -7,7 +7,7 @@ use App\Repositories\Contracts\MemoryCardRepositoryInterface;
 use App\Services\AppLangService;
 use App\Services\CurrentGroupService;
 use App\Services\GroupsService;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
@@ -94,6 +94,9 @@ class GroupsServiceTest extends TestCase
     }
 
     /**
+     * The repository contract returns an Eloquent collection, so the mock must
+     * honour that exact return type.
+     *
      * @param  array<int, int>  $ids
      */
     private function groupCollection(array $ids): Collection

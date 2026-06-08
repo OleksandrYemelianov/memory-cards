@@ -8,6 +8,9 @@ use PHPUnit\Framework\TestCase;
 /**
  * Pure unit test: EmptyTranslateService has no dependencies, so it can be
  * instantiated directly without booting the framework.
+ *
+ * It is the fallback used when no translation API key is configured, so it
+ * reports translation access as unavailable and echoes text back unchanged.
  */
 class EmptyTranslateServiceTest extends TestCase
 {
@@ -24,9 +27,9 @@ class EmptyTranslateServiceTest extends TestCase
         $this->assertSame('hello', $this->service->translate('hello', 'EN', 'DE'));
     }
 
-    public function test_access_is_always_granted(): void
+    public function test_access_is_denied_without_api_key(): void
     {
-        $this->assertTrue($this->service->checkAccessTranslate());
+        $this->assertFalse($this->service->checkAccessTranslate());
     }
 
     public function test_access_langs_have_expected_shape(): void
