@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Traits\AppResponse;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Auth;
 
 class AppRequest extends FormRequest
@@ -16,8 +17,13 @@ class AppRequest extends FormRequest
         return Auth::check();
     }
 
-    protected function failedValidation(Validator $validator)
+    /**
+     * Build the response returned when validation fails.
+     */
+    protected function failedValidation(Validator $validator): void
     {
-        return $this->responseJson($validator->errors(), 422);
+        throw new HttpResponseException(
+            $this->responseJson($validator->errors(), 422)
+        );
     }
 }

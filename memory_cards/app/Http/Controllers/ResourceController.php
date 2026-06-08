@@ -13,27 +13,6 @@ abstract class ResourceController extends AppController
 {
     abstract protected function getRepository(): RepositoryInterface;
 
-    public function create(): JsonResponse
-    {
-        return $this->handleExceptions(function () {
-            $entity = $this->getRepository()->create($this->request->validated());
-            return $this->responseJson(__('messages.saved'), 200, $entity);
-        });
-    }
-
-    public function update(int $id): JsonResponse
-    {
-        $entity = $this->getRepository()->findByIdForUser($id, Auth::id());
-        if (!$entity) {
-            return $this->responseJson(__('messages.Record not found'), 404);
-        }
-
-        return $this->handleExceptions(function () use ($entity) {
-            $saved = $this->getRepository()->save($entity, $this->request->validated());
-            return $this->responseJson(__('messages.saved'), 200, $saved);
-        });
-    }
-
     public function destroy(int $id): JsonResponse
     {
         $entity = $this->getRepository()->findByIdForUser($id, Auth::id());
@@ -43,5 +22,26 @@ abstract class ResourceController extends AppController
         $this->getRepository()->delete($entity);
 
         return $this->responseJson('');
+    }
+
+    protected function createEntity(array $data): JsonResponse
+    {
+        return $this->handleExceptions(function () use ($data) {
+            $entity = $this->getRepository()->create($data);
+            return $this->responseJson(__('messages.saved'), 200, $entity);
+        });
+    }
+
+    protected function updateEntity(int $id, array $data): JsonResponse
+    {
+        $entity = $this->getRepository()->findByIdForUser($id, Auth::id());
+        if (!$entity) {
+            return $this->responseJson(__('messages.Record not found'), 404);
+        }
+
+        return $this->handleExceptions(function () use ($entity, $data) {
+            $saved = $this->getRepository()->save($entity, $data);
+            return $this->responseJson(__('messages.saved'), 200, $saved);
+        });
     }
 }

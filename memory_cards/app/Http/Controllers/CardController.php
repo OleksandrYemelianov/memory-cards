@@ -22,7 +22,6 @@ class CardController extends ResourceController
     protected TranslatorInterface $translator;
 
     public function __construct(
-        CardRequest $request,
         TranslatorFactory $translatorFactory,
         AppLangService $appLang,
         private MemoryCardRepositoryInterface $cards,
@@ -31,12 +30,21 @@ class CardController extends ResourceController
     ) {
         parent::__construct($appLang);
         $this->translator = $translatorFactory->make();
-        $this->request    = $request;
     }
 
     protected function getRepository(): MemoryCardRepositoryInterface
     {
         return $this->cards;
+    }
+
+    public function create(CardRequest $request): JsonResponse
+    {
+        return $this->createEntity($request->validated());
+    }
+
+    public function update(CardRequest $request, int $id): JsonResponse
+    {
+        return $this->updateEntity($id, $request->validated());
     }
 
     public function index(): View|RedirectResponse

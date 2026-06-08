@@ -67,4 +67,5 @@ return [
     'select_group' => 'Select a group',
     'empty_field' => 'Fill in the field',
     'limit_translate' => 'Translation not available',
+    'import_failed' => 'Import failed',
 ];

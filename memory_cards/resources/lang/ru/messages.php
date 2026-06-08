@@ -67,4 +67,5 @@ return [
     'select_group' => 'Выберите группу',
     'empty_field' => 'Заполните поле',
     'limit_translate' => 'Перевод не доступен',
+    'import_failed' => 'Ошибка импорта',
 ];

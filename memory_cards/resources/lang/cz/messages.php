@@ -67,4 +67,5 @@ return [
     'select_group' => 'Výběr skupiny',
     'empty_field' => 'Vyplňte pole',
     'limit_translate' => 'Překlad není k dispozici',
+    'import_failed' => 'Import se nezdařil',
 ];

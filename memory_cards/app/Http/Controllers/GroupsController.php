@@ -14,19 +14,27 @@ use Illuminate\Http\RedirectResponse;
 class GroupsController extends ResourceController
 {
     public function __construct(
-        GroupRequest $request,
         AppLangService $appLang,
         private GroupRepositoryInterface $groups,
         private LangRepositoryInterface $langs,
         private GroupsService $groupsService,
     ) {
         parent::__construct($appLang);
-        $this->request = $request;
     }
 
     protected function getRepository(): GroupRepositoryInterface
     {
         return $this->groups;
+    }
+
+    public function create(GroupRequest $request): JsonResponse
+    {
+        return $this->createEntity($request->validated());
+    }
+
+    public function update(GroupRequest $request, int $id): JsonResponse
+    {
+        return $this->updateEntity($id, $request->validated());
     }
 
     public function index(): View|RedirectResponse
