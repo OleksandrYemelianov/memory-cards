@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CardRequest;
+use App\Http\Requests\CsvImportRequest;
 use App\Repositories\Contracts\MemoryCardRepositoryInterface;
 use App\Services\AppLangService;
 use App\Services\Contracts\TranslatorInterface;
@@ -14,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CardController extends ResourceController
 {
@@ -63,31 +65,59 @@ class CardController extends ResourceController
         return view('cards.create', $groups);
     }
 
-    /**
-     * GET /cards/import — same story as addView(): closure → method.
-     */
     public function importView(): View
     {
         return view('cards.import', $this->groups->getGroups());
     }
 
-    public function importCsv(Request $request): JsonResponse
+    /**
+     * Import cards from an uploaded CSV (one "foreign,translation" pair per line).
+     *
+     * The whole import runs in a transaction so a failure midway leaves no
+     * partial data. The file handle is always released via finally, and empty
+     * or incomplete rows are skipped rather than inserted as blank cards.
+     *
+     * Cards are inserted one by one with create() rather than a bulk insert:
+     * the MemoryCard "creating" event sets user_id and a random color, and a
+     * bulk insert would bypass those events. For this app's import sizes that
+     * trade-off is fine; a much larger import would warrant a batched insert
+     * that reproduces those fields explicitly.
+     */
+    public function importCsv(CsvImportRequest $request): JsonResponse
     {
-        $file       = $request->file('csv_file');
-        $fileHandle = fopen($file->getPathname(), 'r');
-        $cnt        = 0;
-        $groupId    = (int) $request->get('group_app', 0);
-        while (($row = fgetcsv($fileHandle, 1000, ',')) !== false) {
-            $this->cards->create([
-                'foreign_word' => $row[0],
-                'translation'  => $row[1],
-                'group_id'     => $groupId,
-            ]);
-            $cnt++;
-        }
-        fclose($fileHandle);
+        $groupId = (int) $request->validated()['group_app'];
+        $path    = $request->file('csv_file')->getRealPath();
 
-        return $this->responseJson(sprintf(__('messages.imported_qty_cards'), $cnt));
+        $handle = fopen($path, 'r');
+        if ($handle === false) {
+            return $this->responseJson(__('messages.import_failed'), 500);
+        }
+
+        try {
+            $count = DB::transaction(function () use ($handle, $groupId) {
+                $imported = 0;
+                while (($row = fgetcsv($handle)) !== false) {
+                    $foreign     = trim($row[0] ?? '');
+                    $translation = trim($row[1] ?? '');
+                    if ($foreign === '' || $translation === '') {
+                        continue;
+                    }
+                    $this->cards->create([
+                        'foreign_word' => $foreign,
+                        'translation'  => $translation,
+                        'group_id'     => $groupId,
+                    ]);
+                    $imported++;
+                }
+                return $imported;
+            });
+        } catch (\Throwable $e) {
+            return $this->responseJson(__('messages.import_failed'), 500);
+        } finally {
+            fclose($handle);
+        }
+
+        return $this->responseJson(sprintf(__('messages.imported_qty_cards'), $count));
     }
 
     public function move(Request $request): JsonResponse
